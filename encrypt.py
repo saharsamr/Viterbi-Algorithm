@@ -13,8 +13,7 @@ def generate_codes(current_node, current_code, codes):
     generate_codes(current_node.left, left_code, codes)
 
 
-def encrypt(probs, string):
-    codes = {}
+def encrypt(probs, string, codes):
     min_heap = []
     for prob in xrange(0, len(probs)):
         min_heap.append(Node.Node(chr(ord('a')+prob), probs[prob]))
