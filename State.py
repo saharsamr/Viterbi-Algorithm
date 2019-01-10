@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class State(Enum):
-    first = 1
-    second = 2
-    third = 3
-    forth = 4
+    first = 0
+    second = 1
+    third = 2
+    forth = 3

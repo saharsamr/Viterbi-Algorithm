@@ -1,5 +1,11 @@
 import network_encoding
+import viterbi_decoding
 
 
 if __name__ == '__main__':
-    print network_encoding.encode('110010')
+    string = '110111'
+    print string
+    encoded = network_encoding.encode(string)
+    print encoded
+    viterbi_decoding.decode(encoded)
+
