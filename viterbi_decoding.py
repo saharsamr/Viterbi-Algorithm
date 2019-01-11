@@ -1,19 +1,48 @@
 from State import State
+from copy import deepcopy
 
 
-INF = 1000000000
+INF = 10000000
 
 
-def update_pms(pre_pms, current_pms, bits):
-    current_pms[0] = min(pre_pms[0]+find_hamming_dist(State.first, State.first, bits),
-                         pre_pms[1]+find_hamming_dist(State.second, State.first, bits))
-    current_pms[1] = min(pre_pms[2]+find_hamming_dist(State.third, State.second, bits),
-                         pre_pms[3]+find_hamming_dist(State.forth, State.second, bits))
-    current_pms[2] = min(pre_pms[0]+find_hamming_dist(State.first, State.third, bits),
-                         pre_pms[1]+find_hamming_dist(State.second, State.third, bits))
-    current_pms[3] = min(pre_pms[2]+find_hamming_dist(State.third, State.forth, bits),
-                         pre_pms[3]+find_hamming_dist(State.forth, State.forth, bits))
-    pre_pms = current_pms
+def update_pms(pre_pms, current_pms, bits, pre_path, path):
+    first = pre_pms[0]+find_hamming_dist(State.first, State.first, bits)
+    second = pre_pms[1]+find_hamming_dist(State.second, State.first, bits)
+    current_pms[0] = min(first, second)
+    if first <= second:
+        path[0] = deepcopy(pre_path[0])
+    else:
+        path[0] = deepcopy(pre_path[1])
+    path[0].append(0)
+
+    first = pre_pms[2]+find_hamming_dist(State.third, State.second, bits)
+    second = pre_pms[3]+find_hamming_dist(State.forth, State.second, bits)
+    current_pms[1] = min(first, second)
+    if first <= second:
+        path[1] = deepcopy(pre_path[2])
+    else:
+        path[1] = deepcopy(pre_path[3])
+    path[1].append(0)
+
+    first = pre_pms[0]+find_hamming_dist(State.first, State.third, bits)
+    second = pre_pms[1]+find_hamming_dist(State.second, State.third, bits)
+    current_pms[2] = min(first, second)
+    if first <= second:
+        path[2] = deepcopy(pre_path[0])
+    else:
+        path[2] = deepcopy(pre_path[1])
+    path[2].append(1)
+
+    first = pre_pms[2]+find_hamming_dist(State.third, State.forth, bits)
+    second = pre_pms[3]+find_hamming_dist(State.forth, State.forth, bits)
+    current_pms[3] = min(first, second)
+    if first <= second:
+        path[3] = deepcopy(pre_path[2])
+    else:
+        path[3] = deepcopy(pre_path[3])
+    path[3].append(1)
+
+    return deepcopy(current_pms), deepcopy(path)
 
 
 def find_hamming_dist(first_state, goal_state, bits):
@@ -44,37 +73,14 @@ def find_hamming_dist(first_state, goal_state, bits):
     return hamming_dist
 
 
-def find_data_bit(pre_state, current_state):
-    result = ''
-    if pre_state == 0 and current_state == 2:
-        result = '1'
-    elif pre_state == 0 and current_state == 0:
-        result = '0'
-    elif pre_state == 1 and current_state == 0:
-        result = '0'
-    elif pre_state == 1 and current_state == 2:
-        result = '1'
-    elif pre_state == 2 and current_state == 1:
-        result = '0'
-    elif pre_state == 2 and current_state == 3:
-        result = '1'
-    elif pre_state == 3 and current_state == 1:
-        result = '0'
-    elif pre_state == 3 and current_state == 3:
-        result = '1'
-    return result
-
-
 def decode(string):
-    decoded = ''
+    pre_path = [[], [], [], []]
+    path = deepcopy(pre_path)
     pre_pms = [0, INF, INF, INF]
-    current_pms = pre_pms
-    pre_state = pre_pms.index(min(pre_pms))
-    current_state = pre_state
+    current_pms = deepcopy(pre_pms)
+    current_state = 0
     while len(string) > 0:
-        update_pms(pre_pms, current_pms, string[0:2])
+        pre_pms, pre_path = update_pms(pre_pms, current_pms, string[0:2], pre_path, path)
         current_state = current_pms.index(min(current_pms))
-        decoded += find_data_bit(pre_state, current_state)
         string = string[2:]
-    print 'minimum error: ' + str(current_pms[current_state])
-    print 'decoded string: ' + decoded
+    return str(current_pms[current_state]), ''.join(map(lambda x: str(x), path[current_state]))

@@ -1,0 +1,3 @@
+import encrypt
+
+string = 'saharrajabi'
